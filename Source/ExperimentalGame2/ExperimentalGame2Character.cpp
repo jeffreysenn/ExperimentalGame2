@@ -63,10 +63,10 @@ void AExperimentalGame2Character::SetupPlayerInputComponent(class UInputComponen
 	// We have 2 versions of the rotation bindings to handle different kinds of devices differently
 	// "turn" handles devices that provide an absolute delta, such as a mouse.
 	// "turnrate" is for devices that we choose to treat as a rate of change, such as an analog joystick
-	PlayerInputComponent->BindAxis("Turn", this, &APawn::AddControllerYawInput);
+	PlayerInputComponent->BindAxis("Turn", this, &AExperimentalGame2Character::Turn);
 	PlayerInputComponent->BindAxis("TurnRate", this, &AExperimentalGame2Character::TurnAtRate);
-	PlayerInputComponent->BindAxis("LookUp", this, &APawn::AddControllerPitchInput);
-	PlayerInputComponent->BindAxis("LookUpRate", this, &AExperimentalGame2Character::LookUpAtRate);
+	//PlayerInputComponent->BindAxis("LookUp", this, &APawn::AddControllerPitchInput);
+	//PlayerInputComponent->BindAxis("LookUpRate", this, &AExperimentalGame2Character::LookUpAtRate);
 
 	// handle touch devices
 	PlayerInputComponent->BindTouch(IE_Pressed, this, &AExperimentalGame2Character::TouchStarted);
@@ -76,6 +76,22 @@ void AExperimentalGame2Character::SetupPlayerInputComponent(class UInputComponen
 	PlayerInputComponent->BindAction("ResetVR", IE_Pressed, this, &AExperimentalGame2Character::OnResetVR);
 }
 
+
+void AExperimentalGame2Character::BeginPlay()
+{
+	Super::BeginPlay();
+
+	SetBaseRotation(GetActorRotation());
+}
+
+void AExperimentalGame2Character::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+
+	if (MovementInput.Size() < 0.1f) { SetBaseRotation(GetActorRotation()); 
+	//UE_LOG(LogTemp, Warning, TEXT("BaseRotation: %s"), *GetActorRotation().ToString());
+	}
+}
 
 void AExperimentalGame2Character::OnResetVR()
 {
@@ -92,29 +108,43 @@ void AExperimentalGame2Character::TouchStopped(ETouchIndex::Type FingerIndex, FV
 		StopJumping();
 }
 
-void AExperimentalGame2Character::TurnAtRate(float Rate)
+void AExperimentalGame2Character::SetBaseRotation(FRotator Rotation)
 {
-	// calculate delta for this frame from the rate information
-	AddControllerYawInput(Rate * BaseTurnRate * GetWorld()->GetDeltaSeconds());
+	BaseRotation = Rotation;
 }
 
-void AExperimentalGame2Character::LookUpAtRate(float Rate)
+void AExperimentalGame2Character::Turn(float Value)
 {
-	// calculate delta for this frame from the rate information
-	AddControllerPitchInput(Rate * BaseLookUpRate * GetWorld()->GetDeltaSeconds());
+	FRotator NewRotation = GetActorRotation();
+	NewRotation.Yaw += Value * GetWorld()->GetDeltaSeconds();
+	SetActorRotation(NewRotation);
 }
+
+void AExperimentalGame2Character::TurnAtRate(float Rate)
+{
+	FRotator NewRotation = GetActorRotation();
+	NewRotation.Yaw += Rate * BaseTurnRate * GetWorld()->GetDeltaSeconds();
+	SetActorRotation(NewRotation);
+}
+
+//void AExperimentalGame2Character::LookUpAtRate(float Rate)
+//{
+//	// calculate delta for this frame from the rate information
+//	AddControllerPitchInput(Rate * BaseLookUpRate * GetWorld()->GetDeltaSeconds());
+//}
 
 void AExperimentalGame2Character::MoveForward(float Value)
 {
 	if ((Controller != NULL) && (Value != 0.0f))
 	{
 		// find out which way is forward
-		const FRotator Rotation = Controller->GetControlRotation();
+		const FRotator Rotation = BaseRotation;
 		const FRotator YawRotation(0, Rotation.Yaw, 0);
 
 		// get forward vector
 		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
 		AddMovementInput(Direction, Value);
+		MovementInput.X = Value;
 	}
 }
 
@@ -123,12 +153,14 @@ void AExperimentalGame2Character::MoveRight(float Value)
 	if ( (Controller != NULL) && (Value != 0.0f) )
 	{
 		// find out which way is right
-		const FRotator Rotation = Controller->GetControlRotation();
+		const FRotator Rotation = BaseRotation;
 		const FRotator YawRotation(0, Rotation.Yaw, 0);
 	
 		// get right vector 
 		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
 		// add movement in that direction
 		AddMovementInput(Direction, Value);
+		MovementInput.Y = Value;
 	}
 }
+
