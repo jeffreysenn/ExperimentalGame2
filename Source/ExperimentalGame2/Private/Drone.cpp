@@ -2,6 +2,7 @@
 
 #include "../Public/Drone.h"
 #include "Components/InputComponent.h"
+#include "Components/SceneComponent.h"
 #include "GameFramework/Character.h"
 #include "Kismet/GameplayStatics.h"
 
@@ -20,6 +21,7 @@ ADrone::ADrone()
 void ADrone::BeginPlay()
 {
 	Super::BeginPlay();
+
 }
 
 
@@ -48,6 +50,11 @@ void ADrone::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	PlayerInputComponent->BindAxis("LookUp", this, &APawn::AddControllerPitchInput);
 	PlayerInputComponent->BindAxis("LookUpRate", this, &ADrone::LookUpAtRate);
 
+}
+
+void ADrone::SetOtherPlayerEarComponent(USceneComponent * Ear)
+{
+	OtherPlayerEarComponent = Ear; 
 }
 
 void ADrone::MoveForward(float Value)
@@ -103,10 +110,12 @@ void ADrone::UpdateAudioListenerLocation()
 	if (!Controller) { return; }
 	APlayerController* MyPlayerController = Cast<APlayerController>(Controller);
 	if (!MyPlayerController) { return; }
-	ACharacter* OtherPlayerCharacter = UGameplayStatics::GetPlayerCharacter(GetWorld(), 1);
-	if (!OtherPlayerCharacter) { return; }
-	USceneComponent* OtherPlayerEarComponent = OtherPlayerCharacter->GetComponentsByTag("Ear")[0]
-	MyPlayerController->SetAudioListenerOverride(OtherPlayerCharacter->GetRootComponent(), FVector::ZeroVector, FRotator::ZeroRotator);
+	if (!OtherPlayerEarComponent) 
+	{ 
+		UE_LOG(LogTemp, Error, TEXT("Can't find ears"));
+		return; 
+	}
+	MyPlayerController->SetAudioListenerOverride(OtherPlayerEarComponent, FVector::ZeroVector, FRotator::ZeroRotator);
 	//FVector AudioLocation, FrontDir, RightDir;
 	//MyPlayerController->GetAudioListenerPosition(AudioLocation, FrontDir, RightDir);
 	//UE_LOG(LogTemp, Warning, TEXT("AudioListenerLocation: %s"), *AudioLocation.ToString());

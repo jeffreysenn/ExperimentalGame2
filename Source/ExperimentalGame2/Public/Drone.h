@@ -35,6 +35,15 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	UFUNCTION(BlueprintCallable)
+	void SetOtherPlayerEarComponent(USceneComponent* Ear);
+
+	UFUNCTION(BlueprintCallable)
+	FORCEINLINE USceneComponent* GetOtherPlayerEarComponent() { return OtherPlayerEarComponent; }
+
+	class USceneComponent* OtherPlayerEarComponent;
+
+
 protected:
 
 	virtual void MoveForward(float Value);
@@ -54,5 +63,6 @@ protected:
 	void LookUpAtRate(float Rate);
 
 	void UpdateAudioListenerLocation();
+
 
 };
