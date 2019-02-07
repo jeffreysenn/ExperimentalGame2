@@ -2,6 +2,8 @@
 
 #include "../Public/Drone.h"
 #include "Components/InputComponent.h"
+#include "GameFramework/Character.h"
+#include "Kismet/GameplayStatics.h"
 
 // Sets default values
 ADrone::ADrone()
@@ -20,10 +22,14 @@ void ADrone::BeginPlay()
 	Super::BeginPlay();
 }
 
+
+
 // Called every frame
 void ADrone::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	UpdateAudioListenerLocation();
 
 }
 
@@ -91,4 +97,19 @@ void ADrone::LookUpAtRate(float Rate)
 {
 	AddControllerPitchInput(Rate * BaseLookUpRate * GetWorld()->GetDeltaSeconds());
 }
+
+void ADrone::UpdateAudioListenerLocation()
+{
+	if (!Controller) { return; }
+	APlayerController* MyPlayerController = Cast<APlayerController>(Controller);
+	if (!MyPlayerController) { return; }
+	ACharacter* OtherPlayerCharacter = UGameplayStatics::GetPlayerCharacter(GetWorld(), 1);
+	if (!OtherPlayerCharacter) { return; }
+	USceneComponent* OtherPlayerEarComponent = OtherPlayerCharacter->GetComponentsByTag("Ear")[0]
+	MyPlayerController->SetAudioListenerOverride(OtherPlayerCharacter->GetRootComponent(), FVector::ZeroVector, FRotator::ZeroRotator);
+	//FVector AudioLocation, FrontDir, RightDir;
+	//MyPlayerController->GetAudioListenerPosition(AudioLocation, FrontDir, RightDir);
+	//UE_LOG(LogTemp, Warning, TEXT("AudioListenerLocation: %s"), *AudioLocation.ToString());
+}
+
 
