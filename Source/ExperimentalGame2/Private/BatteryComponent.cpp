@@ -58,5 +58,6 @@ void UBatteryComponent::CostBatteryPercent(float Percent)
 void UBatteryComponent::RecoverBatteryPercent(float DeltaPercent)
 {
 	CurrentPercent += DeltaPercent;
+	if (CurrentPercent > 100) { CurrentPercent = 100; }
 }
 
