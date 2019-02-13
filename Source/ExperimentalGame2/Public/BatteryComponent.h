@@ -16,6 +16,15 @@ public:
 	// Sets default values for this component's properties
 	UBatteryComponent();
 
+	UPROPERTY(EditAnywhere, Category = "Setup")
+	float BatteryDrainingAmount = 0.5f;
+
+	UPROPERTY(EditAnywhere, Category = "Setup")
+	float BatteryDrainingPeriod = 0.1f;
+
+	UPROPERTY(EditAnywhere, Category = "Setup")
+	float ZeroBatteryMovementSpeed = 100;
+
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
@@ -37,16 +46,20 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void RecoverBatteryPercent(float DeltaPercent);
 
-	UPROPERTY(EditAnywhere, Category = "Setup")
-	float BatteryDrainingAmount = 0.5f;
+	class UFloatingPawnMovement* GetMovementComponent() const;
 
-	UPROPERTY(EditAnywhere, Category = "Setup")
-	float BatteryDrainingPeriod = 0.1f;
+	void StartZeroBatteryMode();
+
+	void RecoverMovement();
+
 
 
 private:
 	float InitialPercent = 100;
+	UPROPERTY(VisibleAnywhere)
 	float CurrentPercent = 100;
+
+	float InitialMaxSpeed;
 
 	FTimerHandle BatteryTimerHandle;
 

@@ -2,6 +2,7 @@
 
 #include "../Public/BatteryComponent.h"
 #include "Public/TimerManager.h"
+#include "GameFramework/FloatingPawnMovement.h"
 
 // Sets default values for this component's properties
 UBatteryComponent::UBatteryComponent()
@@ -21,12 +22,13 @@ void UBatteryComponent::BeginPlay()
 
 	SetupBatteryDrainingTimer();
 	
+	InitialMaxSpeed = GetMovementComponent()->MaxSpeed;
 }
 
 void UBatteryComponent::SetupBatteryDrainingTimer()
 {
 	FTimerDelegate TimerDel;
-	TimerDel.BindUFunction(this, FName("CostBatteryPercent"), BatteryDrainingPeriod);
+	TimerDel.BindUFunction(this, FName("CostBatteryPercent"), BatteryDrainingAmount);
 
 	GetWorld()->GetTimerManager().SetTimer(BatteryTimerHandle, TimerDel, BatteryDrainingPeriod, true);
 }
@@ -49,15 +51,41 @@ void UBatteryComponent::TickComponent(float DeltaTime, ELevelTick TickType, FAct
 	// ...
 }
 
-void UBatteryComponent::CostBatteryPercent(float Percent)
+void UBatteryComponent::CostBatteryPercent(float DeltaPercent)
 {
-	CurrentPercent -= Percent;
-	if (CurrentPercent < 0) { CurrentPercent = 0; }
+	CurrentPercent -= DeltaPercent;
+	if (CurrentPercent < 0) 
+	{
+		CurrentPercent = 0; 
+		StartZeroBatteryMode();
+	}
 }
 
 void UBatteryComponent::RecoverBatteryPercent(float DeltaPercent)
 {
+	if (CurrentPercent == 0)
+	{
+		RecoverMovement();
+	}
 	CurrentPercent += DeltaPercent;
 	if (CurrentPercent > 100) { CurrentPercent = 100; }
 }
+
+UFloatingPawnMovement * UBatteryComponent::GetMovementComponent() const
+{
+	UActorComponent* MovementComponentObj = GetOwner()->GetComponentByClass(UFloatingPawnMovement::StaticClass());
+	if (!MovementComponentObj) { return nullptr; }
+	return Cast<UFloatingPawnMovement>(MovementComponentObj);
+}
+
+void UBatteryComponent::StartZeroBatteryMode()
+{
+	GetMovementComponent()->MaxSpeed = ZeroBatteryMovementSpeed;
+}
+
+void UBatteryComponent::RecoverMovement()
+{
+	GetMovementComponent()->MaxSpeed = InitialMaxSpeed;
+}
+
 
