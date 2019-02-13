@@ -53,17 +53,23 @@ void UBatteryComponent::TickComponent(float DeltaTime, ELevelTick TickType, FAct
 
 void UBatteryComponent::CostBatteryPercent(float DeltaPercent)
 {
-	CurrentPercent -= DeltaPercent;
-	if (CurrentPercent < 0) 
+	if (CurrentPercent >= 0 && CurrentPercent - DeltaPercent < 0) 
 	{
-		CurrentPercent = 0; 
 		StartZeroBatteryMode();
+	}
+
+	CurrentPercent -= DeltaPercent;
+
+	if (CurrentPercent <= -100) 
+	{
+		CurrentPercent = -100;
+		// implement losing
 	}
 }
 
 void UBatteryComponent::RecoverBatteryPercent(float DeltaPercent)
 {
-	if (CurrentPercent == 0)
+	if (CurrentPercent < 0)
 	{
 		RecoverMovement();
 	}
