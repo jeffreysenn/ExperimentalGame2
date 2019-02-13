@@ -6,6 +6,7 @@
 #include "Components/ActorComponent.h"
 #include "BatteryComponent.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FBatteryDelegate, int32, BatteryWarningIndex);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class EXPERIMENTALGAME2_API UBatteryComponent : public UActorComponent
@@ -52,7 +53,8 @@ public:
 
 	void RecoverMovement();
 
-
+	UPROPERTY(BlueprintAssignable, Category = "Delegates")
+	FBatteryDelegate OnBatteryDrained;
 
 private:
 	float InitialPercent = 100;

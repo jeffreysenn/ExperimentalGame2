@@ -53,9 +53,17 @@ void UBatteryComponent::TickComponent(float DeltaTime, ELevelTick TickType, FAct
 
 void UBatteryComponent::CostBatteryPercent(float DeltaPercent)
 {
+
+	if (CurrentPercent >= 50 && CurrentPercent - DeltaPercent < 50) 
+	{
+		OnBatteryDrained.Broadcast(0);
+	}
+
+
 	if (CurrentPercent >= 0 && CurrentPercent - DeltaPercent < 0) 
 	{
 		StartZeroBatteryMode();
+		OnBatteryDrained.Broadcast(1);
 	}
 
 	CurrentPercent -= DeltaPercent;
@@ -63,6 +71,7 @@ void UBatteryComponent::CostBatteryPercent(float DeltaPercent)
 	if (CurrentPercent <= -100) 
 	{
 		CurrentPercent = -100;
+		OnBatteryDrained.Broadcast(2);
 		// implement losing
 	}
 }
