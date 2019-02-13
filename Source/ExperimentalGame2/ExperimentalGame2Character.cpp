@@ -112,7 +112,7 @@ void AExperimentalGame2Character::MoveForward(float Value)
 {
 	if ((Controller != NULL) && (Value != 0.0f))
 	{
-		if (Value < 0) { return; }
+		//if (Value < 0) { return; }
 		// find out which way is forward
 		const FRotator Rotation = GetActorRotation();
 		const FRotator YawRotation(0, Rotation.Yaw, 0);
