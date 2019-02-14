@@ -49,6 +49,7 @@ void ADrone::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	PlayerInputComponent->BindAxis("TurnRate", this, &ADrone::TurnAtRate);
 	PlayerInputComponent->BindAxis("LookUp", this, &APawn::AddControllerPitchInput);
 	PlayerInputComponent->BindAxis("LookUpRate", this, &ADrone::LookUpAtRate);
+	PlayerInputComponent->BindAction("ResetCamera", IE_Pressed, this, &ADrone::ResetCamera);
 
 }
 
@@ -56,6 +57,15 @@ void ADrone::SetOtherPlayerEarComponent(USceneComponent * Ear)
 {
 	OtherPlayerEarComponent = Ear; 
 }
+
+void ADrone::ResetCamera()
+{
+	if (!OtherPlayerEarComponent) { return; }
+	FVector MeToOtherPlayer = OtherPlayerEarComponent->GetComponentLocation() - GetActorLocation();
+	RotateCameraTo(MeToOtherPlayer.Rotation());
+}
+
+
 
 void ADrone::MoveForward(float Value)
 {

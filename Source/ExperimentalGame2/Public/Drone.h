@@ -41,6 +41,12 @@ public:
 	UFUNCTION(BlueprintCallable)
 	FORCEINLINE USceneComponent* GetOtherPlayerEarComponent() { return OtherPlayerEarComponent; }
 
+	void ResetCamera();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void RotateCameraTo(FRotator Rotation);
+
+
 	class USceneComponent* OtherPlayerEarComponent;
 
 
